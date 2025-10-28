@@ -85,12 +85,16 @@ $id_registro = null;
 if ($registro) {
     // Si ya existe un registro, lo actualizamos
     $id_registro = $registro['id'];
+   // ...
     if ($tipo_encuesta == 'asesor' && !$registro['encuesta_asesor_completada']) {
-        $hora_inicio = $data['hora_inicio'] ?? null;
-        $hora_termino = $data['hora_termino'] ?? null;
-        $stmt = $conexion->prepare("UPDATE validaciones_asesorias SET encuesta_asesor_completada = TRUE, hora_inicio = ?, hora_termino = ? WHERE id = ?");
-        $stmt->bind_param("ssi", $hora_inicio, $hora_termino, $id_registro);
+        
+        $duracion = $data['duracion_asesoria'] ?? null;
+        $stmt = $conexion->prepare("UPDATE validaciones_asesorias SET encuesta_asesor_completada = TRUE, duracion_reportada = ? WHERE id = ?");
+        $stmt->bind_param("si", $duracion, $id_registro);
+       
+
         $stmt->execute();
+// ...
         $stmt->close();
         if ($registro['encuesta_asesorado_completada']) { $validar_hora_final = true; }
     } elseif ($tipo_encuesta == 'asesorado' && !$registro['encuesta_asesorado_completada']) {
@@ -103,10 +107,10 @@ if ($registro) {
 } else {
     // Si no existe, creamos el nuevo registro
     if ($tipo_encuesta == 'asesor') {
-        $hora_inicio = $data['hora_inicio'] ?? null;
-        $hora_termino = $data['hora_termino'] ?? null;
-        $stmt = $conexion->prepare("INSERT INTO validaciones_asesorias (asesor_id, fecha_asesoria, encuesta_asesor_completada, hora_inicio, hora_termino) VALUES (?, ?, TRUE, ?, ?)");
-        $stmt->bind_param("isss", $asesor_id, $fecha_asesoria, $hora_inicio, $hora_termino);
+    
+        $duracion = $data['duracion_asesoria'] ?? null;
+        $stmt = $conexion->prepare("INSERT INTO validaciones_asesorias (asesor_id, fecha_asesoria, encuesta_asesor_completada, duracion_reportada) VALUES (?, ?, TRUE, ?)");
+        $stmt->bind_param("iss", $asesor_id, $fecha_asesoria, $duracion);
     } else { // tipo_encuesta == 'asesorado'
         $stmt = $conexion->prepare("INSERT INTO validaciones_asesorias (asesor_id, fecha_asesoria, encuesta_asesorado_completada) VALUES (?, ?, TRUE)");
         $stmt->bind_param("is", $asesor_id, $fecha_asesoria);
