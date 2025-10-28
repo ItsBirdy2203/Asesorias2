@@ -40,7 +40,7 @@ if ($resultado->num_rows > 0) {
 } else {
     // Si NO lo encuentra, auto-registra al asesor
     // Nota: Usamos $asesor_nombre_original para el INSERT, 
-    // para que el nombre se guarde con mayúsculas (ej. "Juan Perez")
+    // para que el nombre se guarde con mayúsculas (ej. "Emmanuel")
     
     $partes_nombre = explode(' ', strtolower($asesor_nombre_original)); // Para el username está bien minúsculas
     $nombre_usuario = $partes_nombre[0][0] . end($partes_nombre);
@@ -201,4 +201,5 @@ http_response_code(200);
 echo json_encode(['status' => 'success', 'message' => $mensaje_final]);
 $conexion->close();
 ?> 
+
 
