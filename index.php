@@ -46,19 +46,20 @@ $resultado = $conexion->query($sql);
                                 <th>Contacto</th>
                             </tr>
                         </thead>
-                        <tbody>
+                       <tbody>
                             <?php
                             if ($resultado && $resultado->num_rows > 0) {
                                 while($fila = $resultado->fetch_assoc()) {
                                     echo "<tr>";
-                                    echo "<td>" . htmlspecialchars($fila['nombre_completo']) . "</td>";
-                                    echo "<td>" . htmlspecialchars($fila['materias']) . "</td>";
-                                    echo "<td>" . htmlspecialchars($fila['horario_lunes']) . "</td>";
-                                    echo "<td>" . htmlspecialchars($fila['horario_martes']) . "</td>";
-                                    echo "<td>" . htmlspecialchars($fila['horario_miercoles']) . "</td>";
-                                    echo "<td>" . htmlspecialchars($fila['horario_jueves']) . "</td>";
-                                    echo "<td>" . htmlspecialchars($fila['horario_viernes']) . "</td>";
-                                    echo "<td>" . htmlspecialchars($fila['contacto']) . "</td>";
+                                    // Añadimos '?? ""' a cada variable
+                                    echo "<td>" . htmlspecialchars($fila['nombre_completo'] ?? '') . "</td>";
+                                    echo "<td>" . htmlspecialchars($fila['materias'] ?? '') . "</td>";
+                                    echo "<td>" . htmlspecialchars($fila['horario_lunes'] ?? '') . "</td>";
+                                    echo "<td>" . htmlspecialchars($fila['horario_martes'] ?? '') . "</td>";
+                                    echo "<td>" . htmlspecialchars($fila['horario_miercoles'] ?? '') . "</td>";
+                                    echo "<td>" . htmlspecialchars($fila['horario_jueves'] ?? '') . "</td>";
+                                    echo "<td>" . htmlspecialchars($fila['horario_viernes'] ?? '') . "</td>";
+                                    echo "<td>" . htmlspecialchars($fila['contacto'] ?? '') . "</td>";
                                     echo "</tr>";
                                 }
                             } else {
@@ -77,3 +78,4 @@ $resultado = $conexion->query($sql);
 </body>
 
 </html>
+
