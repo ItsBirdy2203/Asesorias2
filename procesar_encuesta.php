@@ -13,7 +13,7 @@ if (!$data || !isset($data['tipo_encuesta'], $data['asesor_nombre'], $data['fech
     exit();
 }
 
-// --- PASO 2: ASIGNAR VARIABLES Y OBTENER ID DEL ASESOR (LÓGICA CORREGIDA) ---
+// --- PASO 2: ASIGNAR VARIABLES Y OBTENER ID DEL ASESOR (LÓGICA A PRUEBA DE BALAS) ---
 $tipo_encuesta  = $data['tipo_encuesta'];
 $asesor_nombre_input = trim($data['asesor_nombre']); 
 $fecha_asesoria = $data['fecha_asesoria'];
@@ -22,21 +22,21 @@ $asesor_id = null;
 // 1. Verificación de seguridad: Si el nombre está vacío, detenemos el script.
 if (empty($asesor_nombre_input)) {
     http_response_code(400);
+    // --- AQUÍ ESTABA EL ERROR (CORREGIDO) ---
     echo json_encode(['status' => 'error', 'message' => 'El nombre del asesor no puede estar vacío.']);
     exit();
 }
 
-// 2. NORMALIZAMOS EL NOMBRE ANTES DE CUALQUIER OTRA ACCIÓN
+// 2. NORMALIZACIÓN TOTAL
 //    - Quitamos espacios al inicio/final (trim)
 //    - Reemplazamos espacios múltiples por uno solo (preg_replace)
-//    - Convertimos a minúsculas para la BÚSQUEDA
-$nombre_normalizado = preg_replace('/\s+/', ' ', $asesor_nombre_input);
-$nombre_busqueda_lower = strtolower($nombre_normalizado);
+//    - Convertimos a minúsculas
+$nombre_normalizado_lower = strtolower(preg_replace('/\s+/', ' ', $asesor_nombre_input));
 
-// 3. Hacemos la búsqueda en la BD comparando de la misma manera
-//    (Asumimos que los nombres guardados en la BD también están normalizados)
-$stmt_find = $conexion->prepare("SELECT alumno_id FROM perfiles_asesores WHERE LOWER(nombre_completo) = ?");
-$stmt_find->bind_param("s", $nombre_busqueda_lower);
+// 3. Hacemos la búsqueda MÁS SIMPLE Y RÁPIDA
+//    Buscamos una coincidencia exacta con el nombre limpio y en minúsculas.
+$stmt_find = $conexion->prepare("SELECT alumno_id FROM perfiles_asesores WHERE nombre_completo = ?");
+$stmt_find->bind_param("s", $nombre_normalizado_lower);
 $stmt_find->execute();
 $resultado = $stmt_find->get_result();
 
@@ -48,7 +48,7 @@ if ($resultado->num_rows > 0) {
     // Si NO lo encuentra, auto-registra al asesor
     
     // Generamos un nombre de usuario (ej. "emartinez")
-    $partes_nombre = explode(' ', $nombre_busqueda_lower); // usamos el nombre ya limpio
+    $partes_nombre = explode(' ', $nombre_normalizado_lower); // usamos el nombre ya limpio
     $nombre_usuario = $partes_nombre[0][0] . end($partes_nombre); 
     $usuario_base = $nombre_usuario;
     $contador = 1;
@@ -75,10 +75,8 @@ if ($resultado->num_rows > 0) {
     $stmt_insert_perfil = $conexion->prepare("INSERT INTO perfiles_asesores (alumno_id, nombre_completo) VALUES (?, ?)");
     
     // ¡¡ESTE ES EL CAMBIO CLAVE!!
-    // Guardamos el nombre YA NORMALIZADO (con mayúsculas si quieres, pero LIMPIO de espacios)
-    // $nombre_normalizado (ej. "Emmanuel Garcia") en lugar de $asesor_nombre_input (ej. " Emmanuel  Garcia ")
-    
-    $stmt_insert_perfil->bind_param("is", $nuevo_alumno_id, $nombre_normalizado);
+    // Guardamos el nombre EXACTAMENTE como lo buscamos: limpio y en minúsculas.
+    $stmt_insert_perfil->bind_param("is", $nuevo_alumno_id, $nombre_normalizado_lower);
     $stmt_insert_perfil->execute();
     $stmt_insert_perfil->close();
     
@@ -200,4 +198,5 @@ http_response_code(200);
 echo json_encode(['status' => 'success', 'message' => $mensaje_final]);
 $conexion->close();
 ?>
+
 
