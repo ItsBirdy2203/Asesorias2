@@ -1,5 +1,6 @@
 <?php
-// Archivo: procesar_encuesta.php (Versión Corregida y Funcional)
+// Archivo: procesar_encuesta.php
+// (Versión corregida con normalización de nombres y cálculo de horas por duración)
 require_once 'db_conexion.php';
 
 // --- PASO 1: LEER DATOS Y VALIDAR ENTRADA ---
@@ -12,23 +13,26 @@ if (!$data || !isset($data['tipo_encuesta'], $data['asesor_nombre'], $data['fech
     exit();
 }
 
-// --- PASO 2: ASIGNAR VARIABLES Y OBTENER ID DEL ASESOR (CON AUTO-REGISTRO) ---
+// --- PASO 2: ASIGNAR VARIABLES Y OBTENER ID DEL ASESOR (LÓGICA CORREGIDA) ---
 $tipo_encuesta  = $data['tipo_encuesta'];
-// Guardamos el nombre original (con trim) para el auto-registro
 $asesor_nombre_original = trim($data['asesor_nombre']); 
 $fecha_asesoria = $data['fecha_asesoria'];
 $asesor_id = null;
 
-// NORMALIZAMOS el nombre SÓLO PARA LA BÚSQUEDA:
-// 1. Convertimos a minúsculas
+// 1. Verificación de seguridad: Si el nombre está vacío, detenemos el script.
+if (empty($asesor_nombre_original)) {
+    http_response_code(400);
+    echo json_encode(['status' => 'error', 'message' => 'El nombre del asesor no puede estar vacío.']);
+    exit();
+}
+
+// 2. Normalizamos el nombre para la búsqueda (quitamos espacios y a minúsculas)
+//    Nota: Reemplazamos múltiples espacios con uno solo USANDO PHP, no SQL.
 $nombre_busqueda = strtolower($asesor_nombre_original);
-// 2. Reemplazamos múltiples espacios (incluyendo tabulaciones, etc.) con un solo espacio
 $nombre_busqueda = preg_replace('/\s+/', ' ', $nombre_busqueda);
 
-// Lógica para buscar o auto-registrar al asesor (LÓGICA DE BÚSQUEDA CORREGIDA)
-// Comparamos la versión normalizada de la BD (con LOWER, TRIM y REGEXP_REPLACE) 
-// con nuestra versión normalizada ($nombre_busqueda)
-$stmt_find = $conexion->prepare("SELECT alumno_id FROM perfiles_asesores WHERE REGEXP_REPLACE(LOWER(TRIM(nombre_completo)), '\s+', ' ') = ?");
+// 3. Hacemos la búsqueda en la BD comparando de la misma manera (simple y rápido)
+$stmt_find = $conexion->prepare("SELECT alumno_id FROM perfiles_asesores WHERE LOWER(TRIM(nombre_completo)) = ?");
 $stmt_find->bind_param("s", $nombre_busqueda);
 $stmt_find->execute();
 $resultado = $stmt_find->get_result();
@@ -39,13 +43,14 @@ if ($resultado->num_rows > 0) {
     $asesor_id = $fila['alumno_id'];
 } else {
     // Si NO lo encuentra, auto-registra al asesor
-    // Nota: Usamos $asesor_nombre_original para el INSERT, 
-    // para que el nombre se guarde con mayúsculas (ej. "Emmanuel")
     
-    $partes_nombre = explode(' ', strtolower($asesor_nombre_original)); // Para el username está bien minúsculas
-    $nombre_usuario = $partes_nombre[0][0] . end($partes_nombre);
+    // Generamos un nombre de usuario (ej. "emartinez")
+    $partes_nombre = explode(' ', strtolower($asesor_nombre_original));
+    $nombre_usuario = $partes_nombre[0][0] . end($partes_nombre); 
     $usuario_base = $nombre_usuario;
     $contador = 1;
+
+    // Bucle para asegurar que el nombre de usuario sea único
     while(true) {
         $stmt_check_user = $conexion->prepare("SELECT id FROM alumnos WHERE usuario = ?");
         $stmt_check_user->bind_param("s", $nombre_usuario);
@@ -55,6 +60,7 @@ if ($resultado->num_rows > 0) {
         $nombre_usuario = $usuario_base . $contador++;
     }
     
+    // Insertamos el nuevo ALUMNO
     $contrasena_default = "asesor123";
     $stmt_insert_alumno = $conexion->prepare("INSERT INTO alumnos (usuario, password, rol) VALUES (?, ?, 2)");
     $stmt_insert_alumno->bind_param("ss", $nombre_usuario, $contrasena_default);
@@ -62,8 +68,8 @@ if ($resultado->num_rows > 0) {
     $nuevo_alumno_id = $conexion->insert_id;
     $stmt_insert_alumno->close();
     
+    // Insertamos el nuevo PERFIL DE ASESOR (usando el nombre original)
     $stmt_insert_perfil = $conexion->prepare("INSERT INTO perfiles_asesores (alumno_id, nombre_completo) VALUES (?, ?)");
-    // Usamos el nombre original (solo con trim) para guardarlo
     $stmt_insert_perfil->bind_param("is", $nuevo_alumno_id, $asesor_nombre_original);
     $stmt_insert_perfil->execute();
     $stmt_insert_perfil->close();
@@ -71,6 +77,7 @@ if ($resultado->num_rows > 0) {
     $asesor_id = $nuevo_alumno_id; // Usamos el ID recién creado
 }
 $stmt_find->close();
+
 
 // --- PASO 3: GESTIONAR VALIDACIÓN (LÓGICA CORREGIDA) ---
 $stmt_check = $conexion->prepare("SELECT * FROM validaciones_asesorias WHERE asesor_id = ? AND fecha_asesoria = ?");
@@ -85,18 +92,18 @@ $id_registro = null;
 if ($registro) {
     // Si ya existe un registro, lo actualizamos
     $id_registro = $registro['id'];
-   // ...
     if ($tipo_encuesta == 'asesor' && !$registro['encuesta_asesor_completada']) {
         
+        // --- LÓGICA NUEVA: Guardar duración ---
         $duracion = $data['duracion_asesoria'] ?? null;
         $stmt = $conexion->prepare("UPDATE validaciones_asesorias SET encuesta_asesor_completada = TRUE, duracion_reportada = ? WHERE id = ?");
         $stmt->bind_param("si", $duracion, $id_registro);
-       
-
+        // --- FIN LÓGICA NUEVA ---
+        
         $stmt->execute();
-// ...
         $stmt->close();
         if ($registro['encuesta_asesorado_completada']) { $validar_hora_final = true; }
+
     } elseif ($tipo_encuesta == 'asesorado' && !$registro['encuesta_asesorado_completada']) {
         $stmt = $conexion->prepare("UPDATE validaciones_asesorias SET encuesta_asesorado_completada = TRUE WHERE id = ?");
         $stmt->bind_param("i", $id_registro);
@@ -107,10 +114,13 @@ if ($registro) {
 } else {
     // Si no existe, creamos el nuevo registro
     if ($tipo_encuesta == 'asesor') {
-    
+        
+        // --- LÓGICA NUEVA: Guardar duración ---
         $duracion = $data['duracion_asesoria'] ?? null;
         $stmt = $conexion->prepare("INSERT INTO validaciones_asesorias (asesor_id, fecha_asesoria, encuesta_asesor_completada, duracion_reportada) VALUES (?, ?, TRUE, ?)");
         $stmt->bind_param("iss", $asesor_id, $fecha_asesoria, $duracion);
+        // --- FIN LÓGICA NUEVA ---
+
     } else { // tipo_encuesta == 'asesorado'
         $stmt = $conexion->prepare("INSERT INTO validaciones_asesorias (asesor_id, fecha_asesoria, encuesta_asesorado_completada) VALUES (?, ?, TRUE)");
         $stmt->bind_param("is", $asesor_id, $fecha_asesoria);
@@ -120,8 +130,7 @@ if ($registro) {
     $stmt->close();
 }
 
-// --- PASO 4: ACCIÓN FINAL (CÁLCULO DE HORAS) ---
-// --- INICIO DE NUEVO PASO 4 ---
+// --- PASO 4: ACCIÓN FINAL (CÁLCULO DE HORAS POR DURACIÓN) ---
 if ($validar_hora_final) {
     // Para el cálculo, volvemos a obtener el registro actualizado
     $stmt_get_duracion = $conexion->prepare("SELECT duracion_reportada FROM validaciones_asesorias WHERE id = ?");
@@ -171,7 +180,7 @@ if ($validar_hora_final) {
         $stmt_sumar_hora->execute();
         $stmt_sumar_hora->close();
         
-        $mensaje_final = '¡Validación completada! Se han registrado ' . $horas_a_sumar . ' hora(s) para ' . $asesor_nombre . '.';
+        $mensaje_final = '¡Validación completada! Se han registrado ' . $horas_a_sumar . ' hora(s) para ' . $asesor_nombre_original . '.';
     } else {
         $mensaje_final = '¡Validación completada! No se registraron horas (duración no válida).';
     }
@@ -179,27 +188,8 @@ if ($validar_hora_final) {
 } else {
     $mensaje_final = 'Encuesta guardada. La hora quedará pendiente de validación.';
 }
-// --- FIN DE NUEVO PASO 4 ---
-
-    // Marcamos como completada y sumamos las horas
-    $stmt_validar = $conexion->prepare("UPDATE validaciones_asesorias SET estado = 'completada' WHERE id = ?");
-    $stmt_validar->bind_param("i", $id_registro);
-    $stmt_validar->execute();
-    $stmt_validar->close();
-    
-    $stmt_sumar_hora = $conexion->prepare("UPDATE perfiles_asesores SET horas_acumuladas = horas_acumuladas + ? WHERE alumno_id = ?");
-    $stmt_sumar_hora->bind_param("ii", $horas_a_sumar, $asesor_id);
-    $stmt_sumar_hora->execute();
-    $stmt_sumar_hora->close();
-    
-    $mensaje_final = '¡Validación completada! Se han registrado ' . $horas_a_sumar . ' hora(s) para ' . $asesor_nombre . '.';
-} else {
-    $mensaje_final = 'Encuesta guardada. La hora quedará pendiente de validación.';
-}
 
 http_response_code(200);
 echo json_encode(['status' => 'success', 'message' => $mensaje_final]);
 $conexion->close();
-?> 
-
-
+?>
