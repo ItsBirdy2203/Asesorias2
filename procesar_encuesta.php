@@ -121,23 +121,65 @@ if ($registro) {
 }
 
 // --- PASO 4: ACCIÓN FINAL (CÁLCULO DE HORAS) ---
+// --- INICIO DE NUEVO PASO 4 ---
 if ($validar_hora_final) {
     // Para el cálculo, volvemos a obtener el registro actualizado
-    $stmt_get_horas = $conexion->prepare("SELECT hora_inicio, hora_termino FROM validaciones_asesorias WHERE id = ?");
-    $stmt_get_horas->bind_param("i", $id_registro);
-    $stmt_get_horas->execute();
-    $tiempos = $stmt_get_horas->get_result()->fetch_assoc();
-    $stmt_get_horas->close();
+    $stmt_get_duracion = $conexion->prepare("SELECT duracion_reportada FROM validaciones_asesorias WHERE id = ?");
+    $stmt_get_duracion->bind_param("i", $id_registro);
+    $stmt_get_duracion->execute();
+    $registro_final = $stmt_get_duracion->get_result()->fetch_assoc();
+    $stmt_get_duracion->close();
 
-    $horas_a_sumar = 1; // Valor por defecto
-    if ($tiempos && !empty($tiempos['hora_inicio']) && !empty($tiempos['hora_termino'])) {
-        $inicio_num = intval($tiempos['hora_inicio']);
-        $termino_num = intval($tiempos['hora_termino']);
-        $horas_calculadas = $termino_num - $inicio_num;
-        if ($horas_calculadas > 3) $horas_a_sumar = 3;
-        elseif ($horas_calculadas >= 1) $horas_a_sumar = $horas_calculadas;
-        else $horas_a_sumar = 1;
+    $horas_a_sumar = 0; // Valor por defecto
+    if ($registro_final && !empty($registro_final['duracion_reportada'])) {
+        
+        // Convertimos la respuesta de texto a un número
+        switch ($registro_final['duracion_reportada']) {
+            case '30 min':
+                $horas_a_sumar = 0.5;
+                break;
+            case '1 hora':
+                $horas_a_sumar = 1;
+                break;
+            case '2 horas':
+                $horas_a_sumar = 2;
+                break;
+            case '3 horas':
+                $horas_a_sumar = 3;
+                break;
+            case '4 horas':
+                $horas_a_sumar = 4;
+                break;
+            default:
+                $horas_a_sumar = 0; // No se suma nada si la respuesta no coincide
+        }
     }
+
+    // Marcamos como completada y sumamos las horas
+    $stmt_validar = $conexion->prepare("UPDATE validaciones_asesorias SET estado = 'completada' WHERE id = ?");
+    $stmt_validar->bind_param("i", $id_registro);
+    $stmt_validar->execute();
+    $stmt_validar->close();
+    
+    // Solo sumamos si es mayor que cero
+    if ($horas_a_sumar > 0) {
+        $stmt_sumar_hora = $conexion->prepare("UPDATE perfiles_asesores SET horas_acumuladas = horas_acumuladas + ? WHERE alumno_id = ?");
+        
+        // ¡¡IMPORTANTE!! Cambiamos "ii" (integer, integer) a "di" (double, integer)
+        $stmt_sumar_hora->bind_param("di", $horas_a_sumar, $asesor_id);
+        
+        $stmt_sumar_hora->execute();
+        $stmt_sumar_hora->close();
+        
+        $mensaje_final = '¡Validación completada! Se han registrado ' . $horas_a_sumar . ' hora(s) para ' . $asesor_nombre . '.';
+    } else {
+        $mensaje_final = '¡Validación completada! No se registraron horas (duración no válida).';
+    }
+
+} else {
+    $mensaje_final = 'Encuesta guardada. La hora quedará pendiente de validación.';
+}
+// --- FIN DE NUEVO PASO 4 ---
 
     // Marcamos como completada y sumamos las horas
     $stmt_validar = $conexion->prepare("UPDATE validaciones_asesorias SET estado = 'completada' WHERE id = ?");
@@ -159,3 +201,4 @@ http_response_code(200);
 echo json_encode(['status' => 'success', 'message' => $mensaje_final]);
 $conexion->close();
 ?> 
+
