@@ -25,4 +25,3 @@ if (!mysqli_real_connect($conexion, $servidor, $usuario_db, $contrasena_db, $nom
 // Establecer el charset para evitar problemas con acentos
 mysqli_set_charset($conexion, 'utf8mb4');
 ?>
-
