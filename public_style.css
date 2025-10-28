@@ -1,0 +1,87 @@
+:root {
+    --color-principal-rojo: #D32F2F;
+    --color-fondo: #f4f7f6;
+    --color-texto-principal: #333;
+    --color-borde: #e0e0e0;
+}
+
+body {
+    background-color: var(--color-fondo);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--color-texto-principal);
+}
+
+.navbar-brand-logo {
+    font-size: 1.8rem;
+    font-weight: 700;
+    background: linear-gradient(45deg, var(--color-principal-rojo), #ff7575);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-decoration: none;
+}
+
+.btn-login {
+    background-color: var(--color-principal-rojo);
+    border-color: var(--color-principal-rojo);
+    color: white;
+    font-weight: 500;
+    padding: 8px 20px;
+    transition: background-color 0.2s;
+}
+
+.btn-login:hover {
+    background-color: #b71c1c;
+    border-color: #b71c1c;
+    color: white;
+}
+
+.main-container {
+    padding-top: 40px;
+    padding-bottom: 40px;
+}
+
+.asesorias-card {
+    background-color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.07);
+    overflow: hidden; /* Para que los bordes redondeados afecten a la tabla */
+}
+
+.asesorias-card .card-header {
+    padding: 1.5rem;
+    background-color: transparent;
+    border-bottom: 1px solid var(--color-borde);
+}
+
+.asesorias-card .card-header h1 {
+    font-size: 1.75rem;
+    margin: 0;
+    font-weight: 600;
+}
+
+.table {
+    vertical-align: middle;
+    margin-bottom: 0; /* Quitar margen inferior de la tabla dentro de la card */
+}
+
+.table thead {
+    background-color: #f8f9fa;
+}
+
+.table th {
+    padding: 1rem;
+    font-weight: 600;
+    color: var(--color-texto-secundario);
+    border-top: none;
+    border-bottom: 1px solid var(--color-borde);
+}
+
+.table td {
+    padding: 1rem;
+    border-top: 1px solid var(--color-borde);
+}
+
+.table tbody tr:hover {
+    background-color: #fdf6f6;
+}
