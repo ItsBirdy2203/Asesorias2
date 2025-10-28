@@ -1,7 +1,0 @@
-{
-    "require": {
-        "ext-mysqli": "*",
-        "ext-json": "*",
-        "ext-mbstring": "*"
-    }
-}
