@@ -24,7 +24,7 @@ $resultado = $conexion->query($sql);
         <ul class="nav flex-column sidebar-nav">
             <li class="nav-item"><a class="nav-link active" href="index.php"><i class="fa-solid fa-house"></i> Home</a></li>
             <li class="nav-item"><a class="nav-link" href="login.php"><i class="fa-solid fa-right-to-bracket"></i> Iniciar Sesión</a></li>
-            <li class="nav-item"><a class="nav-link" href="#"><i class="fa-solid fa-bullhorn"></i> Difusión</a></li>
+            <li class="nav-item"><a class="nav-link" href="difusion.php"><i class="fa-solid fa-bullhorn"></i> Difusión</a></li>
         </ul>
     </nav>
 
@@ -75,4 +75,5 @@ $resultado = $conexion->query($sql);
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
