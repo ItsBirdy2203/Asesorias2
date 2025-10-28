@@ -15,25 +15,28 @@ if (!$data || !isset($data['tipo_encuesta'], $data['asesor_nombre'], $data['fech
 
 // --- PASO 2: ASIGNAR VARIABLES Y OBTENER ID DEL ASESOR (LÓGICA CORREGIDA) ---
 $tipo_encuesta  = $data['tipo_encuesta'];
-$asesor_nombre_original = trim($data['asesor_nombre']); 
+$asesor_nombre_input = trim($data['asesor_nombre']); 
 $fecha_asesoria = $data['fecha_asesoria'];
 $asesor_id = null;
 
 // 1. Verificación de seguridad: Si el nombre está vacío, detenemos el script.
-if (empty($asesor_nombre_original)) {
+if (empty($asesor_nombre_input)) {
     http_response_code(400);
     echo json_encode(['status' => 'error', 'message' => 'El nombre del asesor no puede estar vacío.']);
     exit();
 }
 
-// 2. Normalizamos el nombre para la búsqueda (quitamos espacios y a minúsculas)
-//    Nota: Reemplazamos múltiples espacios con uno solo USANDO PHP, no SQL.
-$nombre_busqueda = strtolower($asesor_nombre_original);
-$nombre_busqueda = preg_replace('/\s+/', ' ', $nombre_busqueda);
+// 2. NORMALIZAMOS EL NOMBRE ANTES DE CUALQUIER OTRA ACCIÓN
+//    - Quitamos espacios al inicio/final (trim)
+//    - Reemplazamos espacios múltiples por uno solo (preg_replace)
+//    - Convertimos a minúsculas para la BÚSQUEDA
+$nombre_normalizado = preg_replace('/\s+/', ' ', $asesor_nombre_input);
+$nombre_busqueda_lower = strtolower($nombre_normalizado);
 
-// 3. Hacemos la búsqueda en la BD comparando de la misma manera (simple y rápido)
-$stmt_find = $conexion->prepare("SELECT alumno_id FROM perfiles_asesores WHERE LOWER(TRIM(nombre_completo)) = ?");
-$stmt_find->bind_param("s", $nombre_busqueda);
+// 3. Hacemos la búsqueda en la BD comparando de la misma manera
+//    (Asumimos que los nombres guardados en la BD también están normalizados)
+$stmt_find = $conexion->prepare("SELECT alumno_id FROM perfiles_asesores WHERE LOWER(nombre_completo) = ?");
+$stmt_find->bind_param("s", $nombre_busqueda_lower);
 $stmt_find->execute();
 $resultado = $stmt_find->get_result();
 
@@ -45,7 +48,7 @@ if ($resultado->num_rows > 0) {
     // Si NO lo encuentra, auto-registra al asesor
     
     // Generamos un nombre de usuario (ej. "emartinez")
-    $partes_nombre = explode(' ', strtolower($asesor_nombre_original));
+    $partes_nombre = explode(' ', $nombre_busqueda_lower); // usamos el nombre ya limpio
     $nombre_usuario = $partes_nombre[0][0] . end($partes_nombre); 
     $usuario_base = $nombre_usuario;
     $contador = 1;
@@ -68,16 +71,20 @@ if ($resultado->num_rows > 0) {
     $nuevo_alumno_id = $conexion->insert_id;
     $stmt_insert_alumno->close();
     
-    // Insertamos el nuevo PERFIL DE ASESOR (usando el nombre original)
+    // Insertamos el nuevo PERFIL DE ASESOR
     $stmt_insert_perfil = $conexion->prepare("INSERT INTO perfiles_asesores (alumno_id, nombre_completo) VALUES (?, ?)");
-    $stmt_insert_perfil->bind_param("is", $nuevo_alumno_id, $asesor_nombre_original);
+    
+    // ¡¡ESTE ES EL CAMBIO CLAVE!!
+    // Guardamos el nombre YA NORMALIZADO (con mayúsculas si quieres, pero LIMPIO de espacios)
+    // $nombre_normalizado (ej. "Emmanuel Garcia") en lugar de $asesor_nombre_input (ej. " Emmanuel  Garcia ")
+    
+    $stmt_insert_perfil->bind_param("is", $nuevo_alumno_id, $nombre_normalizado);
     $stmt_insert_perfil->execute();
     $stmt_insert_perfil->close();
     
     $asesor_id = $nuevo_alumno_id; // Usamos el ID recién creado
 }
 $stmt_find->close();
-
 
 // --- PASO 3: GESTIONAR VALIDACIÓN (LÓGICA CORREGIDA) ---
 $stmt_check = $conexion->prepare("SELECT * FROM validaciones_asesorias WHERE asesor_id = ? AND fecha_asesoria = ?");
@@ -193,3 +200,4 @@ http_response_code(200);
 echo json_encode(['status' => 'success', 'message' => $mensaje_final]);
 $conexion->close();
 ?>
+
