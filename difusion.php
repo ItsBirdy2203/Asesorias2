@@ -30,20 +30,19 @@
                 
                 <p>Selecciona el material que deseas visualizar:</p>
                 <div class="btn-group" role="group" aria-label="Selector de imágenes">
-                    <button type="button" class="btn btn-primary" onclick="mostrarImagen('img-1')">Infografía 1</button>
-                    <button type="button" class="btn btn-success" onclick="mostrarImagen('img-2')">Infografía 2</button>
-                    <button type="button" class="btn btn-info" onclick="mostrarImagen('img-3')">Horarios</button>
+                    <button type="button" class="btn btn-primary" onclick="mostrarImagen('img-1')">Como Funciona?</button>
+                    <button type="button" class="btn btn-success" onclick="mostrarImagen('img-2')">Unete</button>
+                
                 </div>
                 
                 <hr>
 
                 <div class="imagen-difusion-container">
                     
-                    <img id="img-1" class="img-difusion active" src="Asesorias2/Imagen1.png" alt="Infografía 1">
+                    <img id="img-1" class="img-difusion active" src="Asesorias2/Imagen2.png" alt="Infografía 1">
                     
-                    <img id="img-2" class="img-difusion" src="Asesorias2/imagen2.png" alt="Infografía 2">
+                    <img id="img-2" class="img-difusion" src="Asesorias2/Imagen1.png" alt="Infografía 2">
                     
-                    <img id="img-3" class="img-difusion" src="ruta/a/tu/imagen3.jpg" alt="Horarios">
 
                 </div>
 
@@ -77,5 +76,6 @@
 
 </body>
 </html>
+
 
 
