@@ -39,7 +39,7 @@
 
                 <div class="imagen-difusion-container">
                     
-                    <img id="img-1" class="img-difusion active" src="ruta/a/tu/imagen1.jpg" alt="Infografía 1">
+                    <img id="img-1" class="img-difusion active" src="Asesorias2/Imagen1.jpg" alt="Infografía 1">
                     
                     <img id="img-2" class="img-difusion" src="ruta/a/tu/imagen2.jpg" alt="Infografía 2">
                     
@@ -77,3 +77,4 @@
 
 </body>
 </html>
+
