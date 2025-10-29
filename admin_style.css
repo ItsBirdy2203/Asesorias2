@@ -127,33 +127,40 @@ body {
 /* --- ESTILOS PARA LA PÁGINA DE DIFUSIÓN --- */
 
 .imagen-difusion-container {
-    /* Contenedor para que las imágenes no "salten" */
     position: relative;
     width: 100%;
     /* Ajusta esta altura si tus imágenes son más altas o bajas */
     min-height: 500px; 
+    /* (NUEVO) Oculta el deslizamiento fuera del contenedor */
+    overflow: hidden; 
 }
 
 .img-difusion {
-    /* 1. Oculta y posiciona todas las imágenes en el mismo lugar */
+    /* 1. Oculta y posiciona todas las imágenes */
     display: none;
     opacity: 0;
     position: absolute;
     top: 0;
     left: 0;
     
-    /* 2. La animación de fundido (0.4 segundos) */
-    transition: opacity 0.4s ease-in-out; 
+    /* 2. LA ANIMACIÓN (Fundido y Deslizamiento) */
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out; 
+    
+    /* (NUEVO) Comienza 20px más abajo */
+    transform: translateY(20px); 
     
     /* 3. Estilos de la imagen */
-    width: 100%; /* Responsive */
+    width: 100%; 
     height: auto;
-    border-radius: 8px; /* Bordes redondeados */
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1); /* Sombra suave */
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .img-difusion.active {
     /* 4. Muestra la imagen activa */
     display: block; 
     opacity: 1;   
+    /* (NUEVO) Vuelve a su posición original (0px) */
+    transform: translateY(0); 
 }
+
