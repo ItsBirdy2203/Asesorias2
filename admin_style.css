@@ -129,9 +129,17 @@ body {
 .imagen-difusion-container {
     position: relative;
     width: 100%;
-    /* Ajusta esta altura si tus imágenes son más altas o bajas */
-    min-height: 500px; 
-    /* (NUEVO) Oculta el deslizamiento fuera del contenedor */
+
+    /* --- LÍNEAS NUEVAS --- */
+    /* Define un ancho máximo (ej. 700px). 
+       Puedes cambiar este número si lo quieres más grande o pequeño */
+    max-width: 700px; 
+
+    /* Centra el contenedor de la imagen en la página */
+    margin: 0 auto; 
+    /* --- FIN LÍNEAS NUEVAS --- */
+
+    min-height: 500px; /* Puedes ajustar esto si la imagen es muy alta */
     overflow: hidden; 
 }
 
@@ -163,4 +171,7 @@ body {
     /* (NUEVO) Vuelve a su posición original (0px) */
     transform: translateY(0); 
 }
+
+
+
 
