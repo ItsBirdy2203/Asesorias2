@@ -24,10 +24,8 @@
 
     <div class="main-content">
         <div class="card">
-            <div class="card-header"><h2>Material de Difusión</h2></div>
             <div class="card-body">
-                
-                <p>Selecciona el material que deseas visualizar:</p>
+
                 <div class="btn-group" role="group" aria-label="Selector de imágenes">
                     <button type="button" class="btn btn-primary" onclick="mostrarImagen('img-1')">Infografía 1</button>
                     <button type="button" class="btn btn-success" onclick="mostrarImagen('img-2')">Infografía 2</button>
@@ -73,3 +71,4 @@
 
 </body>
 </html>
+
