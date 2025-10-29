@@ -39,9 +39,9 @@
 
                 <div class="imagen-difusion-container">
                     
-                    <img id="img-1" class="img-difusion active" src="Asesorias2/Imagen1.jpg" alt="Infografía 1">
+                    <img id="img-1" class="img-difusion active" src="Asesorias2/Imagen1.png" alt="Infografía 1">
                     
-                    <img id="img-2" class="img-difusion" src="ruta/a/tu/imagen2.jpg" alt="Infografía 2">
+                    <img id="img-2" class="img-difusion" src="Asesorias2/imagen2.png" alt="Infografía 2">
                     
                     <img id="img-3" class="img-difusion" src="ruta/a/tu/imagen3.jpg" alt="Horarios">
 
@@ -77,4 +77,5 @@
 
 </body>
 </html>
+
 
