@@ -136,7 +136,7 @@ body {
     transition: all 0.2s ease-in-out;
     
     /* --- TUS REQUISITOS --- */
-    color: red; /* Letras en rojo */
+    color: #D32F2F; /* Letras en rojo */
     font-size: 1.5rem; /* Letras grandes */
     font-weight: bold;
     text-transform: uppercase;
@@ -181,6 +181,7 @@ body {
     opacity: 1;   
     transform: translateY(0); /* Vuelve a su posición original */
 }
+
 
 
 
