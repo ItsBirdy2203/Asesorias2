@@ -26,9 +26,21 @@
         <div class="card">
             <div class="card-body">
 
-                <div class="btn-group" role="group" aria-label="Selector de imágenes">
-                    <button type="button" class="btn btn-primary" onclick="mostrarImagen('img-1')">Infografía 1</button>
-                    <button type="button" class="btn btn-success" onclick="mostrarImagen('img-2')">Infografía 2</button>
+               <p></p>
+                <div class="row text-center g-3">
+                    
+                    <div class="col-6">
+                        <div class="difusion-selector" onclick="mostrarImagen('img-1')">
+                            Como funciona?
+                        </div>
+                    </div>
+                    
+                    <div class="col-6">
+                        <div class="difusion-selector" onclick="mostrarImagen('img-2')">
+                            Unete a nosotros
+                        </div>
+                    </div>
+
                 </div>
                 
                 <hr>
@@ -71,4 +83,5 @@
 
 </body>
 </html>
+
 
