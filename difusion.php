@@ -1,6 +1,5 @@
 <?php
-// Este archivo no necesita conexión a la BD, pero lo dejamos por si acaso
-// require_once 'db_conexion.php'; 
+// (No se necesita PHP aquí, pero mantenemos la estructura)
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -30,19 +29,17 @@
                 
                 <p>Selecciona el material que deseas visualizar:</p>
                 <div class="btn-group" role="group" aria-label="Selector de imágenes">
-                    <button type="button" class="btn btn-primary" onclick="mostrarImagen('img-1')">Como Funciona?</button>
-                    <button type="button" class="btn btn-success" onclick="mostrarImagen('img-2')">Unete</button>
-                
+                    <button type="button" class="btn btn-primary" onclick="mostrarImagen('img-1')">Infografía 1</button>
+                    <button type="button" class="btn btn-success" onclick="mostrarImagen('img-2')">Infografía 2</button>
                 </div>
                 
                 <hr>
 
                 <div class="imagen-difusion-container">
                     
-                    <img id="img-1" class="img-difusion active" src="Asesorias2/Imagen2.png" alt="Infografía 1">
+                    <img id="img-1" class="img-difusion active" src="Imagen2.png" alt="Infografía 1">
                     
-                    <img id="img-2" class="img-difusion" src="Asesorias2/Imagen1.png" alt="Infografía 2">
-                    
+                    <img id="img-2" class="img-difusion" src="Imagen1.png" alt="Infografía 2">
 
                 </div>
 
@@ -55,20 +52,20 @@
 
 <script>
     function mostrarImagen(idDeImagen) {
-        // 1. Primero, oculta todas las imágenes
+        // 1. Oculta todas las imágenes
         var imagenes = document.querySelectorAll('.img-difusion');
         imagenes.forEach(function(img) {
             img.classList.remove('active');
         });
         
-        // 2. Luego, muestra solo la imagen seleccionada
+        // 2. Muestra solo la imagen seleccionada
         var imagenSeleccionada = document.getElementById(idDeImagen);
         if (imagenSeleccionada) {
             imagenSeleccionada.classList.add('active');
         }
     }
 
-    // Opcional: Asegurarnos de que la primera imagen se muestre al cargar
+    // Asegurarnos de que la primera imagen se muestre al cargar
     document.addEventListener("DOMContentLoaded", function() {
         mostrarImagen('img-1');
     });
@@ -76,6 +73,3 @@
 
 </body>
 </html>
-
-
-
