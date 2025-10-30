@@ -25,14 +25,14 @@ if (empty($asesor_nombre_input)) {
     exit();
 }
 
-// 2. Normalizamos el nombre (solo minúsculas y espacios simples)
-// Esto convierte " José  García " en "jose garcia" (asume que no hay acentos)
-$nombre_normalizado = strtolower(preg_replace('/\s+/', ' ', $asesor_nombre_input));
+// 2. Normalizamos el nombre para la BÚSQUEDA (solo minúsculas y espacios simples)
+// Esto convierte " José  García " en "josé garcía"
+$nombre_busqueda = strtolower(preg_replace('/\s+/', ' ', $asesor_nombre_input));
 
-// 3. Hacemos la búsqueda MÁS SIMPLE Y RÁPIDA
-//    Buscamos una coincidencia exacta con el nombre limpio y en minúsculas.
-$stmt_find = $conexion->prepare("SELECT alumno_id FROM perfiles_asesores WHERE nombre_completo = ?");
-$stmt_find->bind_param("s", $nombre_normalizado);
+// 3. Hacemos la búsqueda en la BD comparando también normalizado
+//    Esto encuentra "José García" (en BD) aunque busquemos "josé garcía"
+$stmt_find = $conexion->prepare("SELECT alumno_id FROM perfiles_asesores WHERE LOWER(TRIM(nombre_completo)) = ?");
+$stmt_find->bind_param("s", $nombre_busqueda);
 $stmt_find->execute();
 $resultado = $stmt_find->get_result();
 
@@ -42,7 +42,7 @@ if ($resultado->num_rows > 0) {
     $asesor_id = $fila['alumno_id'];
 } else {
     // Si NO lo encuentra, auto-registra al asesor
-    $partes_nombre = explode(' ', $nombre_normalizado); // usamos el nombre ya limpio
+    $partes_nombre = explode(' ', $nombre_busqueda); // usamos el nombre ya limpio
     $nombre_usuario = $partes_nombre[0][0] . end($partes_nombre); 
     $usuario_base = $nombre_usuario;
     $contador = 1;
@@ -65,9 +65,9 @@ if ($resultado->num_rows > 0) {
     $nuevo_alumno_id = $conexion->insert_id;
     $stmt_insert_alumno->close();
 
-    // Insertamos el nuevo PERFIL DE ASESOR (guardamos el nombre limpio y en minúsculas)
+    // Insertamos el nuevo PERFIL DE ASESOR (guardamos el nombre original, solo con trim)
     $stmt_insert_perfil = $conexion->prepare("INSERT INTO perfiles_asesores (alumno_id, nombre_completo) VALUES (?, ?)");
-    $stmt_insert_perfil->bind_param("is", $nuevo_alumno_id, $nombre_normalizado);
+    $stmt_insert_perfil->bind_param("is", $nuevo_alumno_id, $asesor_nombre_input);
     $stmt_insert_perfil->execute();
     $stmt_insert_perfil->close();
 
