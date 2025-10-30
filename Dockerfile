@@ -3,11 +3,9 @@ FROM php:8.2-apache
 RUN apt-get update && apt-get install -y \
     default-libmysqlclient-dev \
     libonig-dev \
-    libxml2-dev \
-    libicu-dev \
-    && docker-php-ext-install mysqli mbstring xml intl
+    && docker-php-ext-install mysqli mbstring
 
 COPY . /var/www/html/
 
-# Copia la configuración de errores personalizada
+# Mantenemos el custom.ini para ver errores si algo más falla
 COPY custom.ini /usr/local/etc/php/conf.d/custom-errors.ini
