@@ -4,6 +4,7 @@ RUN apt-get update && apt-get install -y \
     default-libmysqlclient-dev \
     libonig-dev \
     libxml2-dev \
-    && docker-php-ext-install mysqli mbstring xml
+    libicu-dev \
+    && docker-php-ext-install mysqli mbstring xml intl
 
 COPY . /var/www/html/
