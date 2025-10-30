@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'db_conexion.php'; // Asegúrate de que este archivo usa las variables de entorno
+require_once 'db_conexion.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $usuario = $_POST['usuario'];
@@ -21,8 +21,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $fila = $resultado->fetch_assoc();
 
         // --- ¡CAMBIO CLAVE! ---
-        // Verificamos la contraseña hasheada
-        if (password_verify($contrasena, $fila['password'])) {
+        // Comparamos el texto plano directamente
+        if ($contrasena === $fila['password']) {
             // Contraseña correcta: Iniciar sesión
             $_SESSION['alumno_id'] = $fila['id'];
             $_SESSION['usuario'] = $fila['usuario'];
@@ -34,7 +34,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             } elseif ($fila['rol'] == 2) {
                 header("Location: panel_alumno.php");
             } else {
-                // Rol desconocido, por si acaso
                 header("Location: index.php");
             }
             exit();
