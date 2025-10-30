@@ -1,16 +1,13 @@
 <?php
 
 <?php
-// --- INICIO DE FUNCIÓN DE NORMALIZACIÓN ---
 function normalizarNombre($nombre) {
-    // 1. Quitar acentos y caracteres especiales
-    $originales = 'ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýýþÿ';
-    $reemplazos = 'aaaaaaaceeeeiiiidnoooooouuuuybsaaaaaaaceeeeiiiidnoooooouuuuyyby';
-    $nombre = utf8_decode($nombre);
-    $nombre = strtr($nombre, utf8_decode($originales), $reemplazos);
-    $nombre = utf8_encode($nombre);
+    // 1. Quitar acentos (Método moderno y robusto con 'intl')
+    // Convierte "José García" a "Jose Garcia"
+    $transliterator = Transliterator::createFromRules(':: Any-Latin; :: Latin-ASCII; :: NFD; :: [:Nonspacing Mark:] Remove; :: Lower();', Transliterator::FORWARD);
+    $nombre = $transliterator->transliterate($nombre);
 
-    // 2. Convertir a minúsculas
+    // 2. Convertir a minúsculas (el transliterador ya lo hace, pero re-aseguramos)
     $nombre = strtolower($nombre);
 
     // 3. Quitar espacios extra
@@ -19,7 +16,6 @@ function normalizarNombre($nombre) {
 
     return $nombre;
 }
-// --- FIN DE FUNCIÓN DE NORMALIZACIÓN ---
 
 
 // Archivo: procesar_encuesta.php
@@ -216,6 +212,7 @@ http_response_code(200);
 echo json_encode(['status' => 'success', 'message' => $mensaje_final]);
 $conexion->close();
 ?>
+
 
 
 
