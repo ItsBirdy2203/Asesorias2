@@ -138,13 +138,25 @@ $id_registro = null;
 if ($registro) {
     log_debug("Registro de validación ENCONTRADO. ID: " . $registro['id']);
     $id_registro = $registro['id'];
+    
     if ($tipo_encuesta == 'asesor' && !$registro['encuesta_asesor_completada']) {
-        log_debug("Actualizando registro para ASESOR.");
-        $duracion = $data['duracion_asesoria'] ?? null;
-        $stmt = $conexion->prepare("UPDATE validaciones_asesorias SET encuesta_asesor_completada = TRUE, duracion_reportada = ? WHERE id = ?");
-        $stmt->bind_param("si", $duracion, $id_registro);
-        $stmt->execute();
-        $stmt->close();
+    log_debug("Actualizando registro para ASESOR.");
+    // --- INICIO DE CAMBIO (A PRUEBA DE BALAS) ---
+    $duracion_input = $data['duracion_asesoria'] ?? null;
+    $duracion = null; // Default a null
+
+    if (is_string($duracion_input)) {
+        $duracion = strtolower(trim($duracion_input));
+    } elseif (is_array($duracion_input) && !empty($duracion_input)) {
+        // Si es un array (ej. un checkbox), toma solo el primer valor
+        $duracion = strtolower(trim($duracion_input[0]));
+    }
+    // Si es null o cualquier otra cosa, $duracion se queda como null
+    // --- FIN DE CAMBIO ---
+    $stmt = $conexion->prepare("UPDATE validaciones_asesorias SET encuesta_asesor_completada = TRUE, duracion_reportada = ? WHERE id = ?");
+    $stmt->bind_param("si", $duracion, $id_registro);
+//...
+        
         if ($registro['encuesta_asesorado_completada']) { $validar_hora_final = true; }
     } elseif ($tipo_encuesta == 'asesorado' && !$registro['encuesta_asesorado_completada']) {
         log_debug("Actualizando registro para ASESORADO.");
@@ -155,10 +167,21 @@ if ($registro) {
         if ($registro['encuesta_asesor_completada']) { $validar_hora_final = true; }
     }
 } else {
-    log_debug("Registro de validación NO encontrado. Creando uno nuevo...");
+   log_debug("Registro de validación NO encontrado. Creando uno nuevo...");
     if ($tipo_encuesta == 'asesor') {
         log_debug("Creando registro para ASESOR.");
-        $duracion = $data['duracion_asesoria'] ?? null;
+        // --- INICIO DE CAMBIO (A PRUEBA DE BALAS) ---
+        $duracion_input = $data['duracion_asesoria'] ?? null;
+        $duracion = null; // Default a null
+
+        if (is_string($duracion_input)) {
+            $duracion = strtolower(trim($duracion_input));
+        } elseif (is_array($duracion_input) && !empty($duracion_input)) {
+            // Si es un array (ej. un checkbox), toma solo el primer valor
+            $duracion = strtolower(trim($duracion_input[0]));
+        }
+        // Si es null o cualquier otra cosa, $duracion se queda como null
+        // --- FIN DE CAMBIO ---
         $stmt = $conexion->prepare("INSERT INTO validaciones_asesorias (asesor_id, fecha_asesoria, encuesta_asesor_completada, duracion_reportada) VALUES (?, ?, TRUE, ?)");
         $stmt->bind_param("iss", $asesor_id, $fecha_asesoria, $duracion);
     } else { // tipo_encuesta == 'asesorado'
@@ -222,4 +245,5 @@ echo json_encode(['status' => 'success', 'message' => $mensaje_final]);
 log_debug("--- SCRIPT FINALIZADO CON ÉXITO ---");
 $conexion->close();
 ?>
+
 
