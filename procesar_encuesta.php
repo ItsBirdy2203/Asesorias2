@@ -1,4 +1,27 @@
 <?php
+
+<?php
+// --- INICIO DE FUNCIÓN DE NORMALIZACIÓN ---
+function normalizarNombre($nombre) {
+    // 1. Quitar acentos y caracteres especiales
+    $originales = 'ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýýþÿ';
+    $reemplazos = 'aaaaaaaceeeeiiiidnoooooouuuuybsaaaaaaaceeeeiiiidnoooooouuuuyyby';
+    $nombre = utf8_decode($nombre);
+    $nombre = strtr($nombre, utf8_decode($originales), $reemplazos);
+    $nombre = utf8_encode($nombre);
+
+    // 2. Convertir a minúsculas
+    $nombre = strtolower($nombre);
+
+    // 3. Quitar espacios extra
+    $nombre = preg_replace('/\s+/', ' ', $nombre); // Reemplaza múltiples espacios por uno solo
+    $nombre = trim($nombre); // Quita espacios al inicio/final
+
+    return $nombre;
+}
+// --- FIN DE FUNCIÓN DE NORMALIZACIÓN ---
+
+
 // Archivo: procesar_encuesta.php
 // (Versión corregida con normalización de nombres y cálculo de horas por duración)
 require_once 'db_conexion.php';
@@ -198,5 +221,6 @@ http_response_code(200);
 echo json_encode(['status' => 'success', 'message' => $mensaje_final]);
 $conexion->close();
 ?>
+
 
 
