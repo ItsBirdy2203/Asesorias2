@@ -14,7 +14,7 @@ if (!$data || !isset($data['tipo_encuesta'], $data['asesor_nombre'], $data['fech
 
 // --- PASO 2: ASIGNAR VARIABLES Y OBTENER ID DEL ASESOR ---
 $tipo_encuesta  = $data['tipo_encuesta'];
-$asesor_nombre_input = trim($data['asesor_nombre']); // Limpia espacios al inicio/final
+$asesor_nombre_input = trim($data['asesor_nombre']); 
 $fecha_asesoria = $data['fecha_asesoria'];
 $asesor_id = null;
 
@@ -25,14 +25,14 @@ if (empty($asesor_nombre_input)) {
     exit();
 }
 
-// 2. Normalizamos el nombre para la BÚSQUEDA (solo minúsculas y espacios simples)
-// Esto convierte " José  García " en "josé garcía"
-$nombre_busqueda = strtolower(preg_replace('/\s+/', ' ', $asesor_nombre_input));
+// 2. NORMALIZACIÓN TOTAL
+//    Convertimos " José  García " (con o sin acentos) a "jose garcia"
+$nombre_normalizado = strtolower(preg_replace('/\s+/', ' ', $asesor_nombre_input));
 
-// 3. Hacemos la búsqueda en la BD comparando también normalizado
-//    Esto encuentra "José García" (en BD) aunque busquemos "josé garcía"
-$stmt_find = $conexion->prepare("SELECT alumno_id FROM perfiles_asesores WHERE LOWER(TRIM(nombre_completo)) = ?");
-$stmt_find->bind_param("s", $nombre_busqueda);
+// 3. BÚSQUEDA Y GUARDADO IDÉNTICOS
+//    Buscamos una coincidencia exacta con el nombre 100% normalizado.
+$stmt_find = $conexion->prepare("SELECT alumno_id FROM perfiles_asesores WHERE nombre_completo = ?");
+$stmt_find->bind_param("s", $nombre_normalizado);
 $stmt_find->execute();
 $resultado = $stmt_find->get_result();
 
@@ -42,7 +42,7 @@ if ($resultado->num_rows > 0) {
     $asesor_id = $fila['alumno_id'];
 } else {
     // Si NO lo encuentra, auto-registra al asesor
-    $partes_nombre = explode(' ', $nombre_busqueda); // usamos el nombre ya limpio
+    $partes_nombre = explode(' ', $nombre_normalizado); 
     $nombre_usuario = $partes_nombre[0][0] . end($partes_nombre); 
     $usuario_base = $nombre_usuario;
     $contador = 1;
@@ -57,7 +57,6 @@ if ($resultado->num_rows > 0) {
         $nombre_usuario = $usuario_base . $contador++;
     }
 
-    // Insertamos el nuevo ALUMNO
     $contrasena_default = "asesor123";
     $stmt_insert_alumno = $conexion->prepare("INSERT INTO alumnos (usuario, password, rol) VALUES (?, ?, 2)");
     $stmt_insert_alumno->bind_param("ss", $nombre_usuario, $contrasena_default);
@@ -65,9 +64,9 @@ if ($resultado->num_rows > 0) {
     $nuevo_alumno_id = $conexion->insert_id;
     $stmt_insert_alumno->close();
 
-    // Insertamos el nuevo PERFIL DE ASESOR (guardamos el nombre original, solo con trim)
+    // ¡¡CAMBIO CLAVE!! Guardamos el nombre normalizado.
     $stmt_insert_perfil = $conexion->prepare("INSERT INTO perfiles_asesores (alumno_id, nombre_completo) VALUES (?, ?)");
-    $stmt_insert_perfil->bind_param("is", $nuevo_alumno_id, $asesor_nombre_input);
+    $stmt_insert_perfil->bind_param("is", $nuevo_alumno_id, $nombre_normalizado); 
     $stmt_insert_perfil->execute();
     $stmt_insert_perfil->close();
 
