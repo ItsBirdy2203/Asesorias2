@@ -41,7 +41,12 @@ $stmt->close();
         <div class="card">
             <div class="card-header">
                 <h2>Bienvenido, <?php echo htmlspecialchars(ucwords($perfil['nombre_completo'] ?? 'Asesor')); ?></h2>
-            </div>
+                
+                <h5 class="mb-0 mt-2">
+                    Horas Acumuladas: 
+                    <strong style="color: #D32F2F;"><?php echo htmlspecialchars($perfil['horas_acumuladas'] ?? 0); ?></strong>
+                </h5>
+                </div>
             <div class="card-body">
 
                 <?php if (isset($_GET['exito'])): ?>
@@ -177,4 +182,5 @@ $stmt->close();
 </script>
 </body>
 </html>
+
 
