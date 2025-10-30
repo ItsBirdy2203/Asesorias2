@@ -9,23 +9,21 @@ function log_debug($mensaje) {
 log_debug("--- SCRIPT INICIADO ---");
 // --- FIN DE FUNCIÓN DE DEBUG ---
 
-// --- INICIO DE FUNCIÓN DE NORMALIZACIÓN ---
+// --- INICIO DE FUNCIÓN DE NORMALIZACIÓN (VERSIÓN MODERNA) ---
 function normalizarNombre($nombre) {
     log_debug("Normalizando nombre: " . $nombre);
-    // 1. Quitar acentos y caracteres especiales
-    $originales = 'ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýýþÿ';
-    $reemplazos = 'aaaaaaaceeeeiiiidnoooooouuuuybsaaaaaaaceeeeiiiidnoooooouuuuyyby';
-    $nombre = utf8_decode($nombre);
-    $nombre = strtr($nombre, utf8_decode($originales), $reemplazos);
-    $nombre = utf8_encode($nombre);
-    
+
+    // 1. Quitar acentos (método moderno y seguro)
+    $transliterator = Transliterator::createFromRules(':: Any-Latin; :: Latin-ASCII; :: NFD; :: [:Nonspacing Mark:] Remove; :: NFC;', Transliterator::FORWARD);
+    $nombre = $transliterator->transliterate($nombre);
+
     // 2. Convertir a minúsculas
     $nombre = strtolower($nombre);
-    
+
     // 3. Quitar espacios extra
     $nombre = preg_replace('/\s+/', ' ', $nombre); // Reemplaza múltiples espacios por uno solo
     $nombre = trim($nombre); // Quita espacios al inicio/final
-    
+
     log_debug("Nombre normalizado: " . $nombre);
     return $nombre;
 }
@@ -224,3 +222,4 @@ echo json_encode(['status' => 'success', 'message' => $mensaje_final]);
 log_debug("--- SCRIPT FINALIZADO CON ÉXITO ---");
 $conexion->close();
 ?>
+
