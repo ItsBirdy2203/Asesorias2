@@ -45,7 +45,6 @@ if (empty($nombre_normalizado)) {
 }
 
 // 3. BÚSQUEDA Y GUARDADO IDÉNTICOS
-//    Buscamos una coincidencia exacta con el nombre 100% normalizado
 $stmt_find = $conexion->prepare("SELECT alumno_id FROM perfiles_asesores WHERE nombre_completo = ?");
 $stmt_find->bind_param("s", $nombre_normalizado);
 $stmt_find->execute();
@@ -62,7 +61,6 @@ if ($resultado->num_rows > 0) {
     $usuario_base = $nombre_usuario;
     $contador = 1;
 
-    // Bucle para asegurar que el nombre de usuario sea único
     while(true) {
         $stmt_check_user = $conexion->prepare("SELECT id FROM alumnos WHERE usuario = ?");
         $stmt_check_user->bind_param("s", $nombre_usuario);
@@ -79,7 +77,6 @@ if ($resultado->num_rows > 0) {
     $nuevo_alumno_id = $conexion->insert_id;
     $stmt_insert_alumno->close();
 
-    // ¡¡CAMBIO CLAVE!! Guardamos el nombre 100% normalizado
     $stmt_insert_perfil = $conexion->prepare("INSERT INTO perfiles_asesores (alumno_id, nombre_completo) VALUES (?, ?)");
     $stmt_insert_perfil->bind_param("is", $nuevo_alumno_id, $nombre_normalizado); 
     $stmt_insert_perfil->execute();
