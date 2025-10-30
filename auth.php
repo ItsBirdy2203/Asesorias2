@@ -20,7 +20,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($resultado->num_rows === 1) {
         $fila = $resultado->fetch_assoc();
 
-        // --- ¡CAMBIO CLAVE! ---
         // Comparamos el texto plano directamente
         if ($contrasena === $fila['password']) {
             // Contraseña correcta: Iniciar sesión
@@ -28,12 +27,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_SESSION['usuario'] = $fila['usuario'];
             $_SESSION['rol'] = $fila['rol'];
 
-            // Redirigir según el rol
+            // Forzamos el guardado de la sesión ANTES de redirigir
+            session_write_close(); 
+
+            // --- ¡LÓGICA CORREGIDA! ---
+            // Comparamos con DOBLE IGUAL (==)
             if ($fila['rol'] == 1) {
+                // Rol 1 (Admin) va a panel_admin.php
                 header("Location: panel_admin.php");
             } elseif ($fila['rol'] == 2) {
+                // Rol 2 (Asesor) va a panel_alumno.php
                 header("Location: panel_alumno.php");
             } else {
+                // Si hay otro rol, va al index
                 header("Location: index.php");
             }
             exit();
