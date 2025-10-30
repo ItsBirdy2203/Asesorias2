@@ -26,6 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['usuario'], $_POST['con
             } else { // Es Alumno/Asesor (rol 2)
                 $_SESSION['alumno_id'] = $fila['id'];
                 $_SESSION['alumno_usuario'] = $usuario;
+                $_SESSION['rol'] = $fila['rol'];
                 header("Location: panel_alumno.php");
                 exit();
             }
@@ -41,3 +42,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['usuario'], $_POST['con
     exit();
 }
 ?>
+
