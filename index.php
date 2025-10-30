@@ -37,6 +37,7 @@ $resultado = $conexion->query($sql);
                         <thead>
                             <tr>
                                 <th>Nombre del Alumno</th>
+                                <th>Carrera</th>
                                 <th>Materias</th>
                                 <th>Lunes</th>
                                 <th>Martes</th>
@@ -53,6 +54,7 @@ $resultado = $conexion->query($sql);
                                     echo "<tr>";
                                     // Añadimos '?? ""' a cada variable
                                     echo "<td>" . htmlspecialchars(ucwords($fila['nombre_completo'] ?? '')) . "</td>";
+                                    echo "<td>" . htmlspecialchars($fila['carrera'] ?? '') . "</td>";
                                     echo "<td>" . htmlspecialchars($fila['materias'] ?? '') . "</td>";
                                     echo "<td>" . htmlspecialchars($fila['horario_lunes'] ?? '') . "</td>";
                                     echo "<td>" . htmlspecialchars($fila['horario_martes'] ?? '') . "</td>";
@@ -78,6 +80,7 @@ $resultado = $conexion->query($sql);
 </body>
 
 </html>
+
 
 
 
