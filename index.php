@@ -52,7 +52,7 @@ $resultado = $conexion->query($sql);
                                 while($fila = $resultado->fetch_assoc()) {
                                     echo "<tr>";
                                     // Añadimos '?? ""' a cada variable
-                                    echo "<td>" . htmlspecialchars($fila['nombre_completo'] ?? '') . "</td>";
+                                    echo "<td>" . htmlspecialchars(ucwords($fila['nombre_completo'] ?? '')) . "</td>";
                                     echo "<td>" . htmlspecialchars($fila['materias'] ?? '') . "</td>";
                                     echo "<td>" . htmlspecialchars($fila['horario_lunes'] ?? '') . "</td>";
                                     echo "<td>" . htmlspecialchars($fila['horario_martes'] ?? '') . "</td>";
@@ -78,4 +78,5 @@ $resultado = $conexion->query($sql);
 </body>
 
 </html>
+
 
