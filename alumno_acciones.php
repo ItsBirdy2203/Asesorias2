@@ -11,10 +11,9 @@ $alumno_id = $_SESSION['alumno_id'];
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['accion'])) {
 
-    // --- ACCIÓN MODIFICADA: Actualizar Perfil (con Carrera) ---
+    // --- ACCIÓN: Actualizar Perfil (Esta parte está bien) ---
     if ($_POST['accion'] == 'actualizar_perfil') {
 
-        // Obtenemos los datos (añadimos 'carrera')
         $carrera = $_POST['carrera'];
         $materias = $_POST['materias'];
         $contacto = $_POST['contacto'];
@@ -25,7 +24,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['accion'])) {
         $horario_jueves = $_POST['horario_jueves'];
         $horario_viernes = $_POST['horario_viernes'];
 
-        // Preparamos la consulta SQL (añadimos 'carrera')
         $stmt = $conexion->prepare("UPDATE perfiles_asesores SET 
                                         carrera = ?, 
                                         materias = ?, 
@@ -37,7 +35,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['accion'])) {
                                         contacto = ? 
                                     WHERE alumno_id = ?");
 
-        // Actualizamos el bind_param (de "ssssssssi" a "sssssssssi")
         $stmt->bind_param("ssssssssi", $carrera, $materias, $horario_lunes, $horario_martes, $horario_miercoles, $horario_jueves, $horario_viernes, $contacto, $alumno_id);
 
         if ($stmt->execute()) {
@@ -47,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['accion'])) {
         }
         $stmt->close();
 
-    // --- ACCIÓN NUEVA: Cambiar Contraseña ---
+    // --- ACCIÓN MODIFICADA: Cambiar Contraseña (Sin Hash) ---
     } elseif ($_POST['accion'] == 'cambiar_password') {
 
         $password_actual = $_POST['password_actual'];
@@ -60,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['accion'])) {
             exit();
         }
 
-        // 2. Obtener la contraseña actual (hash) de la BD
+        // 2. Obtener la contraseña actual de la BD
         $stmt_get = $conexion->prepare("SELECT password FROM alumnos WHERE id = ?");
         $stmt_get->bind_param("i", $alumno_id);
         $stmt_get->execute();
@@ -72,19 +69,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['accion'])) {
         }
 
         $usuario = $resultado->fetch_assoc();
-        $hash_actual = $usuario['password'];
+        $pass_guardada = $usuario['password']; // La contraseña en texto plano de la BD
         $stmt_get->close();
 
-        // 3. Verificar si la contraseña actual es correcta
-        // Usamos password_verify (tu auth.php usa esto)
-        if (password_verify($password_actual, $hash_actual)) {
+        // 3. Verificar si la contraseña actual es correcta (comparación de texto)
+        if ($password_actual === $pass_guardada) {
 
-            // 4. Si es correcta, crear el hash de la nueva contraseña
-            $nuevo_hash = password_hash($password_nueva, PASSWORD_DEFAULT);
-
-            // 5. Actualizar la contraseña en la BD
+            // 4. Si es correcta, actualizar la contraseña en la BD (guardando texto plano)
             $stmt_update = $conexion->prepare("UPDATE alumnos SET password = ? WHERE id = ?");
-            $stmt_update->bind_param("si", $nuevo_hash, $alumno_id);
+            $stmt_update->bind_param("si", $password_nueva, $alumno_id);
             $stmt_update->execute();
             $stmt_update->close();
 
