@@ -3,7 +3,7 @@ session_start();
 require_once 'db_conexion.php';
 
 // Verificación de sesión de alumno
-if (!isset($_SESSION['alumno_id']) || $_SESSION['rol'] != 2) {
+if (!isset($_SESSION['alumno_id']) || !isset($_SESSION['rol']) || $_SESSION['rol'] != 2) {
     header("Location: login.php");
     exit();
 }
@@ -177,3 +177,4 @@ $stmt->close();
 </script>
 </body>
 </html>
+
