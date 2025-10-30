@@ -147,7 +147,7 @@ if ($validar_hora_final) {
     if ($registro_final && !empty($registro_final['duracion_reportada'])) {
 
         switch ($registro_final['duracion_reportada']) {
-            case '30 min': $horas_a_sumar = 0.5; break;
+            case '30 minutos': $horas_a_sumar = 0.5; break;
             case '1 hora': $horas_a_sumar = 1; break;
             case '2 horas': $horas_a_sumar = 2; break;
             case '3 horas': $horas_a_sumar = 3; break;
@@ -180,3 +180,4 @@ echo json_encode(['status' => 'success', 'message' => $mensaje_final]);
 $conexion->close();
 
 // No incluyas el cierre ?>
+
