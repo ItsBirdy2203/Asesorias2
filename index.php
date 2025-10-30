@@ -2,7 +2,7 @@
 require_once 'db_conexion.php';
 
 // Consulta actualizada para obtener el horario detallado por días
-$sql = "SELECT nombre_completo, materias, horario_lunes, horario_martes, horario_miercoles, horario_jueves, horario_viernes, contacto 
+$sql = "SELECT nombre_completo, carrera, materias, horario_lunes, horario_martes, horario_miercoles, horario_jueves, horario_viernes, contacto 
         FROM perfiles_asesores 
         WHERE nombre_completo IS NOT NULL AND nombre_completo != ''";
 $resultado = $conexion->query($sql);
@@ -78,5 +78,6 @@ $resultado = $conexion->query($sql);
 </body>
 
 </html>
+
 
 
